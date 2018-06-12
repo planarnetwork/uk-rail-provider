@@ -1,0 +1,35 @@
+{
+  "name": "uk-rail-provider",
+  "version": "1.0.0",
+  "description": "API for UK rail journeys and fares",
+  "main": "dist/start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node ./src/start.ts",
+    "prepublishOnly": "tsc -p ./ --outDir dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/planarnetwork/uk-rail-provider.git"
+  },
+  "keywords": [
+    "uk",
+    "rail",
+    "fares",
+    "journeys"
+  ],
+  "author": "Linus Norton <linus@planar.network>",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "koa": "^2.5.1",
+    "koa-better-http-proxy": "^0.2.4",
+    "mysql2": "^1.5.3",
+    "pino": "^4.17.3"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.0.46",
+    "@types/pino": "^4.16.0",
+    "ts-node": "^6.1.1",
+    "typescript": "^2.9.1"
+  }
+}
