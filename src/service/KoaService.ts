@@ -4,7 +4,7 @@ import * as Koa from "koa";
 import proxy = require("koa-better-http-proxy");
 import {Context} from "koa";
 import {isArray} from "util";
-import {FareSigner} from "../fare/FareSigner";
+import {FareStorage} from "../fare/FareStorage";
 import {DatabaseConnection} from "mysql2";
 
 export class KoaService {
@@ -13,7 +13,7 @@ export class KoaService {
     private readonly koaPort: number,
     private readonly logger: Logger,
     private readonly journeyPlannerConfig: JourneyPlannerConfig,
-    private readonly database: DatabaseConnection
+    private readonly faresStorage: FareStorage
   ) {}
 
   /**
@@ -37,15 +37,10 @@ export class KoaService {
 
   private async responseHandler(proxyRes: any, proxyResData: any): Promise<any> {
     const data: JourneyPlannerResponse = JSON.parse(proxyResData.toString("utf8"));
-    const signer = new FareSigner(this.database, data.links);
 
     for (const id in data.links) {
-      if (id.startsWith("/fare-option/")) {
-        data.links[id].signature = signer.sign(id);
-      }
+      id.startsWith("/fare-option/") ? this.faresStorage.store(id, data.links) : id;
     }
-
-    signer.commit();
 
     return JSON.stringify(data);
   }

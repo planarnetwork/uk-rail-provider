@@ -23,13 +23,12 @@
   "dependencies": {
     "koa": "^2.5.1",
     "koa-better-http-proxy": "^0.2.4",
-    "mysql2": "^1.5.3",
     "pino": "^4.17.3"
   },
   "devDependencies": {
     "@types/koa": "^2.0.46",
     "@types/pino": "^4.16.0",
-    "ts-node": "^6.1.1",
-    "typescript": "^2.9.1"
+    "ts-node": "^6.2.0",
+    "typescript": "^2.9.2"
   }
 }
