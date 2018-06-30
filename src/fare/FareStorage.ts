@@ -1,5 +1,4 @@
 
-import {DatabaseConnection} from "mysql2";
 import {Links} from "../service/KoaService";
 import {isString} from "util";
 

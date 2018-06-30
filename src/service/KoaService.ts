@@ -5,7 +5,6 @@ import proxy = require("koa-better-http-proxy");
 import {Context} from "koa";
 import {isArray} from "util";
 import {FareStorage} from "../fare/FareStorage";
-import {DatabaseConnection} from "mysql2";
 
 export class KoaService {
 
@@ -22,8 +21,10 @@ export class KoaService {
   public async start(): Promise<void> {
     const app = new Koa();
 
+
+
     app.use(proxy(this.journeyPlannerConfig.url, {
-      filter: (ctx: Context) => ctx.request.path === '/jp',
+      filter: (ctx: Context) => ctx.request.path === "/jp",
       port: this.journeyPlannerConfig.port,
       https: this.journeyPlannerConfig.port === 443,
       limit: "5mb",
