@@ -2,18 +2,18 @@
 import {Links} from "../service/KoaService";
 import {isString} from "util";
 
-export class FareStorage {
+export class Storage {
 
   constructor(
-    private readonly database: FareDatabase
+    private readonly database: Database
   ) {}
 
   public store(id: string, links: Links): void {
-    const fareOption = links[id] as FareOption;
-    const relevantLinks = this.fetchLinks({}, links, fareOption);
+    const item = links[id];
+    const relevantLinks = this.fetchLinks({}, links, item);
 
     this.database[id] = {
-      response: fareOption,
+      response: item,
       links: relevantLinks
     };
   }
@@ -32,14 +32,9 @@ export class FareStorage {
 
 }
 
-interface FareOption {
-  fares: string[];
-  totalPrice: number;
-}
-
-interface FareDatabase {
+interface Database {
   [fareId: string]: {
-    response: FareOption,
+    response: object,
     links: Links
   }
 }

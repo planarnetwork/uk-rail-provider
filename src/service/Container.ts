@@ -1,6 +1,6 @@
 import {KoaService} from "./KoaService";
 import * as pino from "pino";
-import {FareStorage} from "../fare/FareStorage";
+import {Storage} from "../fare/Storage";
 
 export class Container {
 
@@ -12,7 +12,7 @@ export class Container {
         url: "traintickets.to",
         port: 443
       },
-      new FareStorage({})
+      new Storage({})
     );
   }
 

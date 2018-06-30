@@ -4,7 +4,7 @@ import * as Koa from "koa";
 import proxy = require("koa-better-http-proxy");
 import {Context} from "koa";
 import {isArray} from "util";
-import {FareStorage} from "../fare/FareStorage";
+import {Storage} from "../fare/Storage";
 
 export class KoaService {
 
@@ -12,7 +12,7 @@ export class KoaService {
     private readonly koaPort: number,
     private readonly logger: Logger,
     private readonly journeyPlannerConfig: JourneyPlannerConfig,
-    private readonly faresStorage: FareStorage
+    private readonly storage: Storage
   ) {}
 
   /**
@@ -20,8 +20,6 @@ export class KoaService {
    */
   public async start(): Promise<void> {
     const app = new Koa();
-
-
 
     app.use(proxy(this.journeyPlannerConfig.url, {
       filter: (ctx: Context) => ctx.request.path === "/jp",
@@ -39,9 +37,9 @@ export class KoaService {
   private async responseHandler(proxyRes: any, proxyResData: any): Promise<any> {
     const data: JourneyPlannerResponse = JSON.parse(proxyResData.toString("utf8"));
 
-    for (const id in data.links) {
-      id.startsWith("/fare-option/") ? this.faresStorage.store(id, data.links) : id;
-    }
+    Object.keys(data.links)
+      .filter(id => id.startsWith("/fare-option/") || id.startsWith("/journey/"))
+      .forEach(id => this.storage.store(id, data.links));
 
     return JSON.stringify(data);
   }
