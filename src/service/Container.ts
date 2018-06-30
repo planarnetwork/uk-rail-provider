@@ -5,17 +5,22 @@ import {JPController} from "./controller/jp/JPController";
 import {Storage} from "../fare/Storage";
 import {OrderController} from "./controller/order/OrderController";
 import axios from "axios";
+import * as NodeRSA from "node-rsa";
+import * as fs from "fs";
 
 export class Container {
 
   public async getKoaService(): Promise<KoaService> {
     const jpController = new JPController(new Storage({}));
-    const orderController = new OrderController(axios.create({
-      baseURL: "https://stage.hex.assertis.co.uk",
-      headers: {
-        "X-TENANT": "hex-uat-test"
-      }
-    }));
+    const orderController = new OrderController(
+      axios.create({
+        baseURL: "https://hex.test.assertis.co.uk/",
+        headers: {
+          "X-Tenant": "hex"
+        },
+      }),
+      new NodeRSA(fs.readFileSync("./config/awt/private.key"))
+    );
 
     return new KoaService(
       8002,
@@ -29,7 +34,7 @@ export class Container {
         userResDecorator: jpController.get
       },
       {
-        "post": {
+        "POST": {
           "/order": orderController.post
         }
       }
