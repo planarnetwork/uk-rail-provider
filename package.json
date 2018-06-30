@@ -21,6 +21,10 @@
   "author": "Linus Norton <linus@planar.network>",
   "license": "GPL-3.0",
   "dependencies": {
+    "@koa/cors": "^2.2.1",
+    "@types/axios": "^0.14.0",
+    "autobind-decorator": "^2.1.0",
+    "axios": "^0.18.0",
     "koa": "^2.5.1",
     "koa-better-http-proxy": "^0.2.4",
     "pino": "^4.17.3"

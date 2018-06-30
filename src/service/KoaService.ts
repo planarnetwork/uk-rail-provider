@@ -1,18 +1,21 @@
 
 import {Logger} from "pino";
 import * as Koa from "koa";
-import proxy = require("koa-better-http-proxy");
+import * as cors from "@koa/cors";
+import * as proxy from "koa-better-http-proxy";
 import {Context} from "koa";
 import {isArray} from "util";
-import {Storage} from "../fare/Storage";
+import autobind from "autobind-decorator";
 
+@autobind
 export class KoaService {
 
   constructor(
     private readonly koaPort: number,
     private readonly logger: Logger,
-    private readonly journeyPlannerConfig: JourneyPlannerConfig,
-    private readonly storage: Storage
+    private readonly journeyPlannerUrl: string,
+    private readonly proxyConfig: proxy.IOptions,
+    private readonly routes: Routes
   ) {}
 
   /**
@@ -21,55 +24,58 @@ export class KoaService {
   public async start(): Promise<void> {
     const app = new Koa();
 
-    app.use(proxy(this.journeyPlannerConfig.url, {
-      filter: (ctx: Context) => ctx.request.path === "/jp",
-      port: this.journeyPlannerConfig.port,
-      https: this.journeyPlannerConfig.port === 443,
-      limit: "5mb",
-      userResDecorator: this.responseHandler.bind(this)
-    }));
+    app.use(cors({ origin: "*" }));
+    app.use(this.errorHandler);
+    app.use(this.requestLogger);
+    app.use(this.handler);
+    app.use(proxy(this.journeyPlannerUrl, this.proxyConfig));
 
     app.listen(this.koaPort);
 
     this.logger.info(`Started on ${this.koaPort}`);
   }
 
-  private async responseHandler(proxyRes: any, proxyResData: any): Promise<any> {
-    const data: JourneyPlannerResponse = JSON.parse(proxyResData.toString("utf8"));
+  /**
+   * Log the request info and response time
+   */
+  private async requestLogger(ctx: Context, next: any) {
+    const start = Date.now();
+    await next();
+    const ms = Date.now() - start;
 
-    Object.keys(data.links)
-      .filter(id => id.startsWith("/fare-option/") || id.startsWith("/journey/"))
-      .forEach(id => this.storage.store(id, data.links));
+    this.logger.info(`${ctx.method} ${ctx.url} - ${ms}`);
+    ctx.set("X-Response-Time", `${ms}ms`);
+  }
 
-    return JSON.stringify(data);
+  /**
+   * Process requests if they have a handler
+   */
+  private async handler(ctx: Context, next: () => void) {
+    if (this.routes[ctx.request.method] && this.routes[ctx.request.method][ctx.request.path]) {
+      return this.routes[ctx.request.method][ctx.request.path](ctx);
+    }
+
+    return next();
+  }
+
+  /**
+   * Standard Koa error handling
+   */
+  private async errorHandler(ctx: Context, next: () => void): Promise<void> {
+    try {
+      await next();
+    }
+    catch (err) {
+      ctx.status = err.status || 500;
+      ctx.body = err.message;
+      ctx.app.emit("error", err, ctx);
+    }
   }
 
 }
 
-export interface JourneyPlannerConfig {
-  url: string;
-  port: number;
-}
-
-interface JourneyPlannerResponse {
-  links: Links,
-  response: {
-    outward: Journey[],
-    inward: Journey[],
-    fares: SingleFares | ReturnFares
+interface Routes {
+  [method: string]: {
+    [url: string]: (ctx: Context) => any
   }
-}
-
-type Journey = any;
-
-interface SingleFares {
-  [inwardJourneyId: string]: string[];
-}
-
-interface ReturnFares {
-  [outwardJourneyId: string]: SingleFares;
-}
-
-export interface Links {
-  [id: string]: any;
 }

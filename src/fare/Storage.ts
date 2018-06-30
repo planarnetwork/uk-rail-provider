@@ -1,6 +1,6 @@
 
-import {Links} from "../service/KoaService";
 import {isString} from "util";
+import {Links} from "../service/controller/jp/JPController";
 
 export class Storage {
 
