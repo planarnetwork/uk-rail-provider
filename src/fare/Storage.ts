@@ -5,7 +5,8 @@ import {Links} from "../service/controller/jp/JPController";
 export class Storage {
 
   constructor(
-    private readonly database: Database
+    private readonly database: Database,
+    private readonly whitelist: string[] = ["/fare/", "/fare-option/", "/service/", "/leg/"]
   ) {}
 
   /**
@@ -25,7 +26,7 @@ export class Storage {
    */
   private fetchLinks(newLinks: Links, links: Links, obj: object): object {
     for (const key in obj) {
-      if (typeof obj[key] === "string" && links[obj[key]]) {
+      if (typeof obj[key] === "string" && this.whitelist.some(k => obj[key].startsWith(k))) {
         newLinks[obj[key]] = links[obj[key]];
 
         this.fetchLinks(newLinks, links, newLinks[obj[key]]);
