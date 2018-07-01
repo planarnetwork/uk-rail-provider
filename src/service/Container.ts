@@ -15,7 +15,7 @@ export class Container {
     const jpController = new JPController(storage);
     const orderController = new OrderController(
       axios.create({
-        baseURL: "https://railsmartr.stage.assertis.co.uk/",
+        baseURL: "https://goeuro.stage.assertis.co.uk/",
         headers: {
           "X-Tenant": "rsm"
         },

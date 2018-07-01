@@ -16,9 +16,9 @@ export class OrderController {
 
   public async post(ctx: Context): Promise<void> {
     const token = await this.getSessionToken();
-    const headers = { "X-Access-Token": token };
+    const headers = { "X-Auth-Token": token };
     const request = this.getRequest(ctx.request.body as CreateOrderRequest);
-
+    console.log(request);
     try {
       const response = await this.orderService.post("/order", request, { headers });
 
@@ -36,9 +36,19 @@ export class OrderController {
     const text = Math.random() + "";
     const signature = this.key.encryptPrivate(text, "base64");
     const vendor = "planar";
-    const response = await this.orderService.post<AuthResponse>("/auth", { vendor, text, signature });
 
-    return response.data.data.token;
+    try {
+      const response = await this.orderService.post<AuthResponse>("/auth", { vendor, text, signature });
+
+      return response.data.data.token;
+    }
+    catch (err) {
+      console.log(err.config.headers);
+      console.log({ vendor, text, signature });
+      console.log(err.response.data);
+
+      throw new Error("Unable to creating token");
+    }
   }
 
   public getRequest({items}: CreateOrderRequest): CreateOrderRequest {

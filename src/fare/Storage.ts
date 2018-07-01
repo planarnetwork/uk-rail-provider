@@ -25,10 +25,13 @@ export class Storage {
    */
   private fetchLinks(newLinks: Links, links: Links, obj: object): object {
     for (const key in obj) {
-      if (obj.hasOwnProperty(key) && isString(obj[key]) && obj[key].charAt(0) === "/" && links[key]) {
-        newLinks[key] = links[key];
+      if (typeof obj[key] === "string" && links[obj[key]]) {
+        newLinks[obj[key]] = links[obj[key]];
 
-        this.fetchLinks(newLinks, links, newLinks[key]);
+        this.fetchLinks(newLinks, links, newLinks[obj[key]]);
+      }
+      else if (typeof obj[key] === "object" && obj[key] !== null) {
+        this.fetchLinks(newLinks, links, obj[key]);
       }
     }
 
