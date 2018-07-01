@@ -22,16 +22,18 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@koa/cors": "^2.2.1",
-    "@types/axios": "^0.14.0",
     "autobind-decorator": "^2.1.0",
     "axios": "^0.18.0",
     "koa": "^2.5.1",
     "koa-better-http-proxy": "^0.2.4",
+    "koa-bodyparser": "^4.2.1",
     "node-rsa": "^1.0.0",
     "pino": "^4.17.3"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/koa": "^2.0.46",
+    "@types/koa-bodyparser": "^5.0.0",
     "@types/node": "^10.5.1",
     "@types/node-rsa": "^0.4.3",
     "@types/pino": "^4.16.0",

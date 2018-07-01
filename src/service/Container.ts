@@ -11,15 +11,17 @@ import * as fs from "fs";
 export class Container {
 
   public async getKoaService(): Promise<KoaService> {
-    const jpController = new JPController(new Storage({}));
+    const storage = new Storage({});
+    const jpController = new JPController(storage);
     const orderController = new OrderController(
       axios.create({
-        baseURL: "https://hex.test.assertis.co.uk/",
+        baseURL: "https://railsmartr.stage.assertis.co.uk/",
         headers: {
-          "X-Tenant": "hex"
+          "X-Tenant": "rsm"
         },
       }),
-      new NodeRSA(fs.readFileSync("./config/awt/private.key"))
+      new NodeRSA(fs.readFileSync("./config/awt/private.key")),
+      storage
     );
 
     return new KoaService(

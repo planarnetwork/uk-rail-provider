@@ -13,8 +13,11 @@ export class JPController {
     const data: JourneyPlannerResponse = JSON.parse(proxyResData.toString("utf8"));
 
     Object.keys(data.links)
-      .filter(id => id.startsWith("/fare-option/") || id.startsWith("/journey/"))
-      .forEach(id => this.storage.store(id, data.links));
+      .filter(id => id.startsWith("/fare-option/"))
+      .map(id => [id, data.links[id]])
+      .concat(data.response.outward.map(item => [item.id, item]))
+      .concat(data.response.inward.map(item => [item.id, item]))
+      .forEach(([id, item]) => this.storage.store(id, item, data.links));
 
     return JSON.stringify(data);
   }

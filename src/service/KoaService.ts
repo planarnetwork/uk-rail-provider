@@ -3,6 +3,7 @@ import {Logger} from "pino";
 import * as Koa from "koa";
 import * as cors from "@koa/cors";
 import * as proxy from "koa-better-http-proxy";
+import * as bodyParser from "koa-bodyparser";
 import {Context} from "koa";
 import {isArray} from "util";
 import autobind from "autobind-decorator";
@@ -27,8 +28,9 @@ export class KoaService {
     app.use(cors({ origin: "*" }));
     app.use(this.errorHandler);
     app.use(this.requestLogger);
-    app.use(this.handler);
     app.use(proxy(this.journeyPlannerUrl, this.proxyConfig));
+    app.use(bodyParser());
+    app.use(this.handler);
 
     app.listen(this.koaPort);
 
