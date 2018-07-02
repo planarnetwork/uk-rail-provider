@@ -15,8 +15,8 @@ export class JPController {
     Object.keys(data.links)
       .filter(id => id.startsWith("/fare-option/"))
       .map(id => [id, data.links[id]])
-      .concat(data.response.outward.map(item => [item.id, item]))
-      .concat(data.response.inward.map(item => [item.id, item]))
+      .concat(data.data.outward.map(item => [item.id, item]))
+      .concat(data.data.inward.map(item => [item.id, item]))
       .forEach(([id, item]) => this.storage.store(id, item, data.links));
 
     return JSON.stringify(data);
@@ -26,7 +26,7 @@ export class JPController {
 
 interface JourneyPlannerResponse {
   links: Links,
-  response: {
+  data: {
     outward: Journey[],
     inward: Journey[],
     fares: SingleFares | ReturnFares

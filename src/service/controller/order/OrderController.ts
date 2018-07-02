@@ -18,7 +18,7 @@ export class OrderController {
     const token = await this.getSessionToken();
     const headers = { "X-Auth-Token": token };
     const request = this.getRequest(ctx.request.body as CreateOrderRequest);
-    console.log(request);
+
     try {
       const response = await this.orderService.post("/order", request, { headers });
 
