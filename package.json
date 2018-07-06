@@ -28,7 +28,8 @@
     "koa-better-http-proxy": "^0.2.4",
     "koa-bodyparser": "^4.2.1",
     "node-rsa": "^1.0.0",
-    "pino": "^4.17.3"
+    "pino": "^4.17.3",
+    "web3": "^0.14.1"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
