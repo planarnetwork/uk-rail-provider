@@ -1,14 +1,14 @@
 import {SignatureProvider} from "./SignatureProvider";
 import {Logger} from "pino";
 import * as W3 from 'web3';
+import {Utils} from "web3/types";
 
 // https://github.com/ethereum/web3.js/issues/1248#issuecomment-385207638
 const Web3 = require('web3'); // tslint:disable-line
 
 export class EthereumSignatureProvider extends SignatureProvider {
-  private web3: W3.default;
-  
-  public accountIndex: number;
+  private account: any; // should be Account but typings are not wrong https://web3js.readthedocs.io/en/1.0/web3-eth-accounts.html?highlight=privatekey#eth-accounts-create-return
+  private utils: Utils;
   
   constructor(
     private readonly nodeUrl: string,
@@ -16,23 +16,24 @@ export class EthereumSignatureProvider extends SignatureProvider {
     private readonly logger: Logger) {
     super();
     
-    this.web3 = new Web3(new Web3.providers.HttpProvider(nodeUrl));
-    const account = this.web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
-    const {index} = this.web3.eth.accounts.wallet.add(account);
-    
-    logger.debug(`Added account @ index ${index}`);
-    
-    this.accountIndex = index;
+    try {
+      const web3 = new Web3(new Web3.providers.HttpProvider(nodeUrl));
+      this.account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
+      this.utils = web3.utils;
+    }
+    catch (err) {
+      throw new Error(`Failed to import Retailer account. ${err}`);
+    }
   }
   
   hash(params: string[]): string {
-    const hash = this.web3.utils.soliditySha3(params.join(""));
+    const hash = this.utils.soliditySha3(params.join(""));
     this.logger.debug(`hash(${params}) = ${hash}`);
     return hash;
   }
   
   async sign(hash: string): Promise<string> {
-    const signed = await this.web3.eth.sign(hash, this.privateKey);
+    const signed = await this.account.sign(hash);
     this.logger.debug(`sign(${hash}) = ${signed}`);
     return signed;
   }
