@@ -55,7 +55,7 @@ export class OrderController {
       console.log({ vendor, text, signature });
       console.log(err.response.data);
 
-      throw new Error("Unable to creating token");
+      throw new Error("Unable to create token");
     }
   }
 
