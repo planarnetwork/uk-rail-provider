@@ -4,6 +4,7 @@ import autobind from "autobind-decorator";
 import * as NodeRSA from "node-rsa";
 import {Storage} from "../../../fare/Storage";
 import {Links} from "../jp/JPController";
+import {SignatureProvider} from "../../../signature/SignatureProvider";
 
 @autobind
 export class OrderController {
@@ -11,7 +12,8 @@ export class OrderController {
   constructor(
     private readonly orderService: AxiosInstance,
     private readonly key: NodeRSA,
-    private readonly storage: Storage
+    private readonly storage: Storage,
+    private readonly signatureProvider: SignatureProvider
   ) {}
 
   public async post(ctx: Context): Promise<void> {
@@ -26,7 +28,7 @@ export class OrderController {
       ctx.body = response.data;
       ctx.body.data.expiry = Math.floor(Date.now() / 1000) + 38600;
       ctx.body.data.price = 1000;
-      ctx.body.data.signature = this.sign(ctx.body.data);
+      ctx.body.data.signature = await this.sign(ctx.body.data);
 
       await update;
     }
@@ -53,7 +55,7 @@ export class OrderController {
       console.log({ vendor, text, signature });
       console.log(err.response.data);
 
-      throw new Error("Unable to creating token");
+      throw new Error("Unable to create token");
     }
   }
 
@@ -97,11 +99,8 @@ export class OrderController {
     };
   }
 
-  private sign({ uri, price, expiry }: ResponseBody): string {
-    // const hash = Web3Utils.soliditySha3(toBytes32(ticketPayload), ticketCost, expiry);
-    // const signature = web3.eth.sign(retailer, hash);
-
-    return uri + price + expiry;
+  private async sign({ uri, price, expiry }: ResponseBody): Promise<string> {
+    return this.signatureProvider.sign(uri + price + expiry)
   }
 }
 

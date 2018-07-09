@@ -7,18 +7,22 @@ import {OrderController} from "./controller/order/OrderController";
 import axios from "axios";
 import * as NodeRSA from "node-rsa";
 import * as fs from "fs";
-import Web3 = require("web3");
+import {SignatureProvider} from "../signature/SignatureProvider";
+import {EthereumSignatureProvider} from "../signature/EthereumSignatureProvider";
 
 export class Container {
-
+  
   public async getKoaService(): Promise<KoaService> {
+    const logger = pino({prettyPrint: true});
+    
     const storage = new Storage({});
     const jpController = new JPController(storage);
-
-    // const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-    //
-    // web3.personal.unlockAccount(web3.personal.listAccounts[0],fs.readFileSync("./config/retail/account.key"), 1000);
-
+    const signatureProvider = new EthereumSignatureProvider(
+      "http://localhost:8545",
+      fs.readFileSync("./config/retail/account.key", "utf-8"),
+      logger
+    );
+    
     const orderController = new OrderController(
       axios.create({
         baseURL: "https://railsmartr.stage.assertis.co.uk/",
@@ -27,12 +31,13 @@ export class Container {
         },
       }),
       new NodeRSA(fs.readFileSync("./config/awt/private.key")),
-      storage
+      storage,
+      signatureProvider
     );
-
+    
     return new KoaService(
       8000,
-      pino({ prettyPrint: true }),
+      logger,
       "traintickets.to",
       {
         filter: (ctx: Context) => ctx.request.path === "/jp",
@@ -48,5 +53,4 @@ export class Container {
       }
     );
   }
-
 }
