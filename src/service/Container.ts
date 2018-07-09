@@ -7,23 +7,36 @@ import {OrderController} from "./controller/order/OrderController";
 import axios from "axios";
 import * as NodeRSA from "node-rsa";
 import * as fs from "fs";
-import {SignatureProvider} from "../signature/SignatureProvider";
 import {EthereumSignatureProvider} from "../signature/EthereumSignatureProvider";
+import * as memoize from "memoized-class-decorator";
+import {config} from "../../config/retail/config";
+const Web3 = require("web3");
 
 export class Container {
   
   public async getKoaService(): Promise<KoaService> {
-    const logger = pino({prettyPrint: true});
-    
-    const storage = new Storage({});
-    const jpController = new JPController(storage);
-    const signatureProvider = new EthereumSignatureProvider(
-      "http://localhost:8545",
-      fs.readFileSync("./config/retail/account.key", "utf-8"),
-      logger
+    return new KoaService(
+      8000,
+      this.getLogger(),
+      "traintickets.to",
+      {
+        filter: (ctx: Context) => ctx.request.path === "/jp",
+        port: 443,
+        https: true,
+        limit: "5mb",
+        userResDecorator: this.getJPController().get
+      },
+      {
+        "POST": {
+          "/order": this.getOrderController().post
+        }
+      }
     );
-    
-    const orderController = new OrderController(
+  }
+
+  @memoize
+  public getOrderController(): OrderController {
+    return new OrderController(
       axios.create({
         baseURL: "https://railsmartr.stage.assertis.co.uk/",
         headers: {
@@ -31,26 +44,36 @@ export class Container {
         },
       }),
       new NodeRSA(fs.readFileSync("./config/awt/private.key")),
-      storage,
-      signatureProvider
-    );
-    
-    return new KoaService(
-      8000,
-      logger,
-      "traintickets.to",
-      {
-        filter: (ctx: Context) => ctx.request.path === "/jp",
-        port: 443,
-        https: true,
-        limit: "5mb",
-        userResDecorator: jpController.get
-      },
-      {
-        "POST": {
-          "/order": orderController.post
-        }
-      }
+      this.getStorage(),
+      this.getEthereumSignatureProvider()
     );
   }
+
+  @memoize
+  public getStorage(): Storage {
+    return new Storage({});
+  }
+
+  @memoize
+  public getJPController(): JPController {
+    return new JPController(this.getStorage());
+  }
+
+  @memoize
+  public getLogger(): pino.Logger {
+    return pino({ prettyPrint: true, level: "debug" });
+  }
+
+  @memoize
+  public getEthereumSignatureProvider(): EthereumSignatureProvider {
+    const provider = new Web3.providers.HttpProvider(config.infura);
+    const web3 = new Web3(provider);
+
+    return new EthereumSignatureProvider(
+      web3.eth.accounts.privateKeyToAccount(config.privateKey) as any,
+      web3.utils,
+      this.getLogger()
+    );
+  }
+
 }

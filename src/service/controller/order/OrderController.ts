@@ -28,7 +28,7 @@ export class OrderController {
       ctx.body = response.data;
       ctx.body.data.expiry = Math.floor(Date.now() / 1000) + 38600;
       ctx.body.data.price = 1000;
-      ctx.body.data.signature = await this.sign(ctx.body.data);
+      ctx.body.data.signature = this.sign(ctx.body.data);
 
       await update;
     }
@@ -99,8 +99,8 @@ export class OrderController {
     };
   }
 
-  private async sign({ uri, price, expiry }: ResponseBody): Promise<string> {
-    return this.signatureProvider.sign(uri + price + expiry)
+  private sign({ uri, price, expiry }: ResponseBody): string {
+    return this.signatureProvider.sign(uri, price, expiry);
   }
 }
 

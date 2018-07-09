@@ -1,4 +1,4 @@
-export abstract class SignatureProvider {
-  abstract hash(params: string[]): string;
-  abstract async sign(hash: string): Promise<string>;
+
+export interface SignatureProvider {
+  sign: (id: string, price: number, expiry: number) => string;
 }
