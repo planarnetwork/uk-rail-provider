@@ -7,9 +7,10 @@ import {OrderController} from "./controller/order/OrderController";
 import axios from "axios";
 import * as NodeRSA from "node-rsa";
 import * as fs from "fs";
-import {EthereumSignatureProvider} from "../signature/EthereumSignatureProvider";
 import * as memoize from "memoized-class-decorator";
 import {config} from "../../config/retail/config";
+import {CurrencyExchange} from "../currency/CurrencyExchange";
+import {SignatureProvider} from "../signature/SignatureProvider";
 const Web3 = require("web3");
 
 export class Container {
@@ -45,7 +46,8 @@ export class Container {
       }),
       new NodeRSA(fs.readFileSync("./config/awt/private.key")),
       this.getStorage(),
-      this.getEthereumSignatureProvider()
+      this.getSignatureProvider(),
+      this.getCurrencyExchange()
     );
   }
 
@@ -65,15 +67,27 @@ export class Container {
   }
 
   @memoize
-  public getEthereumSignatureProvider(): EthereumSignatureProvider {
-    const provider = new Web3.providers.HttpProvider(config.infura);
-    const web3 = new Web3(provider);
-
-    return new EthereumSignatureProvider(
-      web3.eth.accounts.privateKeyToAccount(config.privateKey) as any,
-      web3.utils,
+  public getSignatureProvider(): SignatureProvider {
+    return new SignatureProvider(
+      this.getWeb3().eth.accounts.privateKeyToAccount(config.privateKey) as any,
+      this.getWeb3().utils,
       this.getLogger()
     );
+  }
+
+  @memoize
+  public getWeb3() {
+    const provider = new Web3.providers.HttpProvider(config.infura);
+
+    return new Web3(provider);
+  }
+
+  @memoize
+  public getCurrencyExchange(): CurrencyExchange {
+    return new CurrencyExchange(
+      axios.create({ baseURL: "https://min-api.cryptocompare.com/" }),
+      this.getWeb3().utils
+    )
   }
 
 }

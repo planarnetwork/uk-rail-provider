@@ -5,6 +5,7 @@ import * as NodeRSA from "node-rsa";
 import {Storage} from "../../../fare/Storage";
 import {Links} from "../jp/JPController";
 import {SignatureProvider} from "../../../signature/SignatureProvider";
+import {CurrencyExchange} from "../../../currency/CurrencyExchange";
 
 @autobind
 export class OrderController {
@@ -13,31 +14,21 @@ export class OrderController {
     private readonly orderService: AxiosInstance,
     private readonly key: NodeRSA,
     private readonly storage: Storage,
-    private readonly signatureProvider: SignatureProvider
+    private readonly signatureProvider: SignatureProvider,
+    private readonly exchange: CurrencyExchange
   ) {}
 
   public async post(ctx: Context): Promise<void> {
     const token = await this.getSessionToken();
-    const headers = { "X-Auth-Token": token };
-    const request = this.getCreateOrderRequest(ctx.request.body as CreateOrderRequest);
+    const {data, links} = await this.createOrder(ctx.request.body as CreateOrderRequest, token);
+    const price = await this.exchange.getWei(this.getPricePence(links));
+    const uri = data.uri;
+    const expiry = Math.floor(Date.now() / 1000) + 38600;
+    const signature = this.signatureProvider.sign(uri, price, expiry);
 
-    try {
-      const response = await this.orderService.post<OrderResponse>("/order", request, { headers });
-      const update = this.orderService.post(response.data.data.uri + "/delivery", this.getDeliveryRequest(), { headers });
-
-      ctx.body = response.data;
-      ctx.body.data.expiry = Math.floor(Date.now() / 1000) + 38600;
-      ctx.body.data.price = this.recalculatePrice(response.data.links);
-      ctx.body.data.signature = this.sign(ctx.body.data);
-
-      await update;
-    }
-    catch (err) {
-      console.log(err.config.headers);
-      console.log(err.response.data);
-
-      throw new Error("Unable to create order");
-    }
+    ctx.body = {
+      data: { uri, price, expiry, signature }, links
+    };
   }
 
   private async getSessionToken(): Promise<string> {
@@ -56,6 +47,25 @@ export class OrderController {
       console.log(err.response.data);
 
       throw new Error("Unable to create token");
+    }
+  }
+
+  private async createOrder(koaRequest: CreateOrderRequest, token: string): Promise<OrderResponse> {
+    const headers = { "X-Auth-Token": token };
+    const request = this.getCreateOrderRequest(koaRequest);
+
+    try {
+      const response = await this.orderService.post<OrderResponse>("/order", request, { headers });
+
+      // might be able to remove this for performance
+      await this.orderService.post(response.data.data.uri + "/delivery", this.getDeliveryRequest(), { headers });
+
+      return response.data;
+    }
+    catch (err) {
+      console.log(err.response.data);
+
+      throw new Error("Unable to create order");
     }
   }
 
@@ -99,11 +109,7 @@ export class OrderController {
     };
   }
 
-  private sign({ uri, price, expiry }: ResponseBody): string {
-    return this.signatureProvider.sign(uri, price, expiry);
-  }
-
-  private recalculatePrice(links: Links): number {
+  private getPricePence(links: Links): number {
     return Object.keys(links).reduce((total, key) => {
       return key.startsWith("/ticket/") ? total + links[links[key].fare].price : total;
     }, 0);
