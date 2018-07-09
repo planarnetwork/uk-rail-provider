@@ -27,7 +27,7 @@ export class OrderController {
 
       ctx.body = response.data;
       ctx.body.data.expiry = Math.floor(Date.now() / 1000) + 38600;
-      ctx.body.data.price = 1000;
+      ctx.body.data.price = this.recalculatePrice(response.data.links);
       ctx.body.data.signature = this.sign(ctx.body.data);
 
       await update;
@@ -59,7 +59,7 @@ export class OrderController {
     }
   }
 
-  public getCreateOrderRequest({items}: CreateOrderRequest): CreateOrderRequest {
+  private getCreateOrderRequest({ items }: CreateOrderRequest): CreateOrderRequest {
     let links = this.addItem({}, items.outward.journey);
 
     if (items.inward) {
@@ -101,6 +101,12 @@ export class OrderController {
 
   private sign({ uri, price, expiry }: ResponseBody): string {
     return this.signatureProvider.sign(uri, price, expiry);
+  }
+
+  private recalculatePrice(links: Links): number {
+    return Object.keys(links).reduce((total, key) => {
+      return key.startsWith("/ticket/") ? total + links[links[key].fare].price : total;
+    }, 0);
   }
 }
 
