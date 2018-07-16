@@ -6,24 +6,23 @@ import {Storage} from "../fare/Storage";
 import {OrderController} from "./controller/order/OrderController";
 import axios from "axios";
 import * as NodeRSA from "node-rsa";
-import * as fs from "fs";
 import * as memoize from "memoized-class-decorator";
-import {config} from "../../config/retail/config";
 import {CurrencyExchange} from "../currency/CurrencyExchange";
 import {SignatureProvider} from "../signature/SignatureProvider";
+import {dev, live} from "../../config/config";
 const Web3 = require("web3");
 
 export class Container {
   
   public async getKoaService(): Promise<KoaService> {
     return new KoaService(
-      8000,
+      this.config.koa.port,
       this.getLogger(),
-      "traintickets.to",
+      this.config.journeyPlanner.url,
       {
         filter: (ctx: Context) => ctx.request.path === "/jp",
-        port: 443,
-        https: true,
+        port: this.config.journeyPlanner.port,
+        https: this.config.journeyPlanner.port === 443,
         limit: "5mb",
         userResDecorator: this.getJPController().get
       },
@@ -38,13 +37,8 @@ export class Container {
   @memoize
   public getOrderController(): OrderController {
     return new OrderController(
-      axios.create({
-        baseURL: "https://railsmartr.stage.assertis.co.uk/",
-        headers: {
-          "X-Tenant": "rsm"
-        },
-      }),
-      new NodeRSA(fs.readFileSync("./config/awt/private.key")),
+      axios.create(this.config.orderService),
+      new NodeRSA(this.config.awt.key),
       this.getStorage(),
       this.getSignatureProvider(),
       this.getCurrencyExchange()
@@ -69,7 +63,7 @@ export class Container {
   @memoize
   public getSignatureProvider(): SignatureProvider {
     return new SignatureProvider(
-      this.getWeb3().eth.accounts.privateKeyToAccount(config.privateKey) as any,
+      this.getWeb3().eth.accounts.privateKeyToAccount(this.config.ethereum.privateKey),
       this.getWeb3().utils,
       this.getLogger()
     );
@@ -77,7 +71,7 @@ export class Container {
 
   @memoize
   public getWeb3() {
-    const provider = new Web3.providers.HttpProvider(config.infura);
+    const provider = new Web3.providers.HttpProvider(this.config.ethereum.infura);
 
     return new Web3(provider);
   }
@@ -85,9 +79,12 @@ export class Container {
   @memoize
   public getCurrencyExchange(): CurrencyExchange {
     return new CurrencyExchange(
-      axios.create({ baseURL: "https://min-api.cryptocompare.com/" }),
+      axios.create(this.config.currencyService),
       this.getWeb3().utils
     )
   }
 
+  public get config() {
+    return process.env.NODE_ENV === "dev" ? dev : live;
+  }
 }
