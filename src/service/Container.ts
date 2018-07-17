@@ -10,8 +10,8 @@ import * as memoize from "memoized-class-decorator";
 import {CurrencyExchange} from "../currency/CurrencyExchange";
 import {SignatureProvider} from "../signature/SignatureProvider";
 import {dev, live} from "../../config/config";
-import {TicketWallet as TicketWalletABI} from "@planar/ticket-wallet";
-import {TicketWallet} from "../fulfilment/FulfilmentService";
+import {TicketWallet} from "@planar/ticket-wallet";
+import {TicketWalletContract} from "../fulfilment/FulfilmentService";
 const Web3 = require("web3");
 
 export class Container {
@@ -79,8 +79,8 @@ export class Container {
   }
 
   @memoize
-  public getTicketWallet(): TicketWallet {
-    return this.getWeb3().eth.Contract(TicketWalletABI, this.config.ethereum.walletAddress, {
+  public getTicketWallet(): TicketWalletContract {
+    return this.getWeb3().eth.Contract(TicketWallet.abi, this.config.ethereum.walletAddress, {
       from: this.config.ethereum.address
     });
   }
