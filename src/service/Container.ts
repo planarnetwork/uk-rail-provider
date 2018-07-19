@@ -43,7 +43,8 @@ export class Container {
       new NodeRSA(this.config.awt.key),
       this.getStorage(),
       this.getSignatureProvider(),
-      this.getCurrencyExchange()
+      this.getCurrencyExchange(),
+      this.config.ethereum.address
     );
   }
 

@@ -15,7 +15,8 @@ export class OrderController {
     private readonly key: NodeRSA,
     private readonly storage: Storage,
     private readonly signatureProvider: SignatureProvider,
-    private readonly exchange: CurrencyExchange
+    private readonly exchange: CurrencyExchange,
+    private readonly retailerAddress: string
   ) {}
 
   public async post(ctx: Context): Promise<void> {
@@ -25,9 +26,10 @@ export class OrderController {
     const uri = data.uri;
     const expiry = Math.floor(Date.now() / 1000) + 38600;
     const signature = this.signatureProvider.sign(uri, price, expiry);
+    const address = this.retailerAddress;
 
     ctx.body = {
-      data: { uri, price, expiry, signature }, links
+      data: { uri, price, expiry, signature, address }, links
     };
   }
 
