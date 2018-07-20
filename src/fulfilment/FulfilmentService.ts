@@ -1,10 +1,11 @@
-import {Contract} from "web3/types";
+import {Contract, Utils} from "web3/types";
 
 export class FulfilmentService {
 
   constructor(
     private readonly wallet: Contract,
     private readonly address: string,
+    private readonly utils: Utils
   ) {}
 
   public start(): void {
@@ -17,11 +18,18 @@ export class FulfilmentService {
         from: this.address
       });
 
-      // console.log(queue);
+      await Promise.all(queue.map(ticketId => this.processTicket(ticketId)));
     }
     catch (err) {
       console.log(err);
     }
+  }
 
+  private async processTicket(ticketId: number): Promise<void> {
+    const uri = await this.wallet.methods.getTicketPayloadUrlById(ticketId).call({
+      from: this.address
+    });
+
+    console.log(this.utils.toAscii(uri));
   }
 }

@@ -97,7 +97,8 @@ export class Container {
   public getFulfilmentService(): FulfilmentService {
     return new FulfilmentService(
       this.getTicketWallet(),
-      this.config.ethereum.address
+      this.config.ethereum.address,
+      this.web3.utils
     );
   }
 
