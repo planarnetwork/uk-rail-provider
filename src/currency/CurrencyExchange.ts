@@ -14,7 +14,7 @@ export class CurrencyExchange {
   public async getWei(pricePence: number): Promise<string> {
     const response = await this.api.get<ExchangeRateResponse>("/data/price?fsym=ETH&tsyms=GBP");
     const rate = response.data.GBP * 100;
-    const ethPrice = pricePence / rate;
+    const ethPrice = (pricePence / rate).toFixed(5);
 
     return this.utils.toWei(ethPrice.toString(), "ether");
   }
