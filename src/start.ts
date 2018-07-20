@@ -6,4 +6,5 @@ const container = new Container();
 
 container.getKoaService()
   .catch(console.error)
-  .then((koa: KoaService) => koa.start());
+  .then((koa: KoaService) => koa.start())
+  .then(() => container.getFulfilmentService().start());

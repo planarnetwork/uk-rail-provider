@@ -11,8 +11,9 @@ import {CurrencyExchange} from "../currency/CurrencyExchange";
 import {SignatureProvider} from "../signature/SignatureProvider";
 import {dev, live} from "../../config/config";
 import {TicketWallet} from "@planar/ticket-wallet";
-import {TicketWalletContract} from "../fulfilment/FulfilmentService";
-const Web3 = require("web3");
+import Web3 = require("web3");
+import {Contract} from "web3/types";
+import {FulfilmentService} from "../fulfilment/FulfilmentService";
 
 export class Container {
   
@@ -66,32 +67,38 @@ export class Container {
   @memoize
   public getSignatureProvider(): SignatureProvider {
     return new SignatureProvider(
-      this.getWeb3().eth.accounts.privateKeyToAccount(this.config.ethereum.privateKey),
-      this.getWeb3().utils,
+      this.web3.eth.accounts.privateKeyToAccount(this.config.ethereum.privateKey) as any,
+      this.web3.utils,
       this.getLogger()
     );
   }
 
   @memoize
-  public getWeb3() {
+  public get web3() {
     const provider = new Web3.providers.HttpProvider(this.config.ethereum.infura);
 
     return new Web3(provider);
   }
 
   @memoize
-  public getTicketWallet(): TicketWalletContract {
-    return this.getWeb3().eth.Contract(TicketWallet.abi, this.config.ethereum.walletAddress, {
-      from: this.config.ethereum.address
-    });
+  public getTicketWallet(): Contract {
+    return new this.web3.eth.Contract(TicketWallet.abi, TicketWallet.networks["3"].address);
   }
 
   @memoize
   public getCurrencyExchange(): CurrencyExchange {
     return new CurrencyExchange(
       axios.create(this.config.currencyService),
-      this.getWeb3().utils
+      this.web3.utils
     )
+  }
+
+  @memoize
+  public getFulfilmentService(): FulfilmentService {
+    return new FulfilmentService(
+      this.getTicketWallet(),
+      this.config.ethereum.address
+    );
   }
 
   public get config() {

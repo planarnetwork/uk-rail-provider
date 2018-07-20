@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node ./src/start.ts",
-    "prepublishOnly": "tsc -p ./ --outDir dist/"
+    "prepublishOnly": "tsc -p ./ --outDir dist/",
+    "postinstall": "rm -f node_modules/web3/index.d.ts"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@koa/cors": "^2.2.2",
-    "@planar/ticket-wallet": "^0.1.2",
+    "@planar/ticket-wallet": "^0.2.2",
     "autobind-decorator": "^2.1.0",
     "axios": "^0.18.0",
     "koa": "^2.5.2",
@@ -39,6 +40,7 @@
     "@types/node": "^10.5.2",
     "@types/node-rsa": "^0.4.3",
     "@types/pino": "^4.16.0",
+    "@types/web3": "^1.0.0",
     "ts-node": "^6.2.0",
     "typescript": "^2.9.2"
   }
