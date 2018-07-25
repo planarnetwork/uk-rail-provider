@@ -23,7 +23,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@koa/cors": "^2.2.2",
-    "@planar/ticket-wallet": "^0.2.2",
+    "@planar/ticket-wallet": "^0.3.0",
     "autobind-decorator": "^2.1.0",
     "axios": "^0.18.0",
     "koa": "^2.5.2",
@@ -31,16 +31,16 @@
     "koa-bodyparser": "^4.2.1",
     "memoized-class-decorator": "^1.6.1",
     "node-rsa": "^1.0.0",
-    "pino": "^4.17.3",
-    "web3": "^1.0.0-beta.34"
+    "pino": "^4.17.5",
+    "web3": "^1.0.0-beta.35"
   },
   "devDependencies": {
     "@types/koa": "^2.0.46",
     "@types/koa-bodyparser": "^5.0.1",
-    "@types/node": "^10.5.2",
+    "@types/node": "^10.5.3",
     "@types/node-rsa": "^0.4.3",
     "@types/pino": "^4.16.0",
-    "@types/web3": "^1.0.0",
+    "@types/web3": "^1.0.1",
     "ts-node": "^6.2.0",
     "typescript": "^2.9.2"
   }

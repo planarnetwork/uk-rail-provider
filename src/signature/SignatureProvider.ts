@@ -12,10 +12,10 @@ export class SignatureProvider {
    * Hash and sign the parameters using the ethereum account
    */
   public sign(id: string, price: string, expiry: number): string {
-    const hash = this.utils.soliditySha3(toBytes32(id), "_", price, "_", expiry);
+    const hash = this.utils.soliditySha3(id, "_", price, "_", expiry);
     const signedData = this.account.sign(hash);
 
-    this.logger.debug(`hash(${toBytes32(id)}, "_", ${price}, "_", ${expiry}) = ${hash}`);
+    this.logger.debug(`hash(${id}, "_", ${price}, "_", ${expiry}) = ${hash}`);
     this.logger.debug(`sign(${hash}) = ${signedData.signature}`);
 
     return signedData.signature;
@@ -38,17 +38,4 @@ interface Signature {
   s: string,
   v: string,
   signature: string
-}
-
-/**
- * Convert a string to a hexidecimal string padded to 32 bytes
- */
-function toBytes32(str) {
-  let hex = '0x';
-
-  for (let i = 0; i < 32; i++) {
-    hex += str.length > i ? str.charCodeAt(i).toString(16) : '00';
-  }
-
-  return hex;
 }

@@ -11,7 +11,7 @@ import {CurrencyExchange} from "../currency/CurrencyExchange";
 import {SignatureProvider} from "../signature/SignatureProvider";
 import {dev, live} from "../../config/config";
 import {TicketWallet} from "@planar/ticket-wallet";
-import Web3 = require("web3");
+const Web3 = require("web3");
 import {Contract} from "web3/types";
 import {FulfilmentService} from "../fulfilment/FulfilmentService";
 
@@ -97,8 +97,7 @@ export class Container {
   public getFulfilmentService(): FulfilmentService {
     return new FulfilmentService(
       this.getTicketWallet(),
-      this.config.ethereum.address,
-      this.web3.utils
+      this.config.ethereum.address
     );
   }
 
