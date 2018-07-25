@@ -2,9 +2,9 @@ import {KoaService} from "./KoaService";
 import * as pino from "pino";
 import {Context} from "koa";
 import {JPController} from "./controller/jp/JPController";
-import {Storage} from "../fare/Storage";
+import {JourneyPlanStorage} from "../order/JourneyPlanStorage";
 import {OrderController} from "./controller/order/OrderController";
-import axios from "axios";
+import axios, {AxiosInstance} from "axios";
 import * as NodeRSA from "node-rsa";
 import * as memoize from "memoized-class-decorator";
 import {CurrencyExchange} from "../currency/CurrencyExchange";
@@ -14,6 +14,9 @@ import {TicketWallet} from "@planar/ticket-wallet";
 const Web3 = require("web3");
 import {Contract} from "web3/types";
 import {FulfilmentService} from "../fulfilment/FulfilmentService";
+import {OrderStorage} from "../order/OrderStorage";
+import {OrderFactory} from "../order/OrderFactory";
+import {OrderPayment} from "../order/OrderPayment";
 
 export class Container {
   
@@ -40,9 +43,7 @@ export class Container {
   @memoize
   public getOrderController(): OrderController {
     return new OrderController(
-      axios.create(this.config.orderService),
-      new NodeRSA(this.config.awt.key),
-      this.getStorage(),
+      this.getOrderFactory(),
       this.getSignatureProvider(),
       this.getCurrencyExchange(),
       this.config.ethereum.address
@@ -50,13 +51,18 @@ export class Container {
   }
 
   @memoize
-  public getStorage(): Storage {
-    return new Storage({});
+  public getJourneyPlanStorage(): JourneyPlanStorage {
+    return new JourneyPlanStorage({});
+  }
+
+  @memoize
+  public getOrderStorage(): OrderStorage {
+    return new OrderStorage({});
   }
 
   @memoize
   public getJPController(): JPController {
-    return new JPController(this.getStorage());
+    return new JPController(this.getJourneyPlanStorage());
   }
 
   @memoize
@@ -97,7 +103,31 @@ export class Container {
   public getFulfilmentService(): FulfilmentService {
     return new FulfilmentService(
       this.getTicketWallet(),
-      this.config.ethereum.address
+      this.config.ethereum.address,
+      this.getOrderPayment()
+    );
+  }
+
+  @memoize
+  public getAWT(): AxiosInstance {
+    return axios.create(this.config.orderService);
+  }
+
+  @memoize
+  public getOrderFactory(): OrderFactory {
+    return new OrderFactory(
+      this.getAWT(),
+      this.getJourneyPlanStorage(),
+      this.getOrderStorage(),
+      new NodeRSA(this.config.awt.key),
+    );
+  }
+
+  @memoize
+  public getOrderPayment(): OrderPayment {
+    return new OrderPayment(
+      this.getAWT(),
+      this.getOrderStorage()
     );
   }
 

@@ -1,12 +1,12 @@
 
-import {Storage} from "../../../fare/Storage";
+import {JourneyPlanStorage} from "../../../order/JourneyPlanStorage";
 import autobind from "autobind-decorator";
 
 @autobind
 export class JPController {
 
   constructor(
-    private readonly storage: Storage
+    private readonly storage: JourneyPlanStorage
   ) {}
 
   public get(proxyRes: any, proxyResData: any): string {

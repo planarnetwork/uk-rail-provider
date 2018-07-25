@@ -2,7 +2,7 @@
 import {isString} from "util";
 import {Links} from "../service/controller/jp/JPController";
 
-export class Storage {
+export class JourneyPlanStorage {
 
   constructor(
     private readonly database: Database,
@@ -48,7 +48,7 @@ export class Storage {
 }
 
 interface Database {
-  [fareId: string]: DatabaseEntry;
+  [id: string]: DatabaseEntry;
 }
 
 export interface DatabaseEntry {
