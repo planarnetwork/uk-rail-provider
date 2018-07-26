@@ -11,9 +11,16 @@ export class OrderPayment {
 
   public async pay(uri): Promise<OrderWithDelivery> {
     const { headers, totalPricePence } = this.orderStorage.get(uri);
+    const response = await this.awt.get(uri, { headers });
+
+    // if it's already fulfilled, then there's nothing to do
+    if (response.data.data.delivery.collectionReference) {
+      return response.data;
+    }
+
     const request = { order: uri, amount: totalPricePence, currency: "GBP", warrantAccountNumber: "", warrantNumber: "" };
 
-    await this.awt.post("/account-warrant", request, { headers });
+    await this.awt.post("/account-warrant", request, {headers});
 
     return this.awaitFulfilment(uri, headers);
   }

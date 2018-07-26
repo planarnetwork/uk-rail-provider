@@ -82,8 +82,13 @@ export class Container {
   @memoize
   public get web3() {
     const provider = new Web3.providers.HttpProvider(this.config.ethereum.infura);
+    const web3 = new Web3(provider);
+    const account = web3.eth.accounts.privateKeyToAccount(this.config.ethereum.privateKey);
 
-    return new Web3(provider);
+    web3.eth.accounts.wallet.add(account);
+    web3.eth.defaultAccount = account.address;
+
+    return web3;
   }
 
   @memoize
@@ -104,7 +109,8 @@ export class Container {
     return new FulfilmentService(
       this.getTicketWallet(),
       this.config.ethereum.address,
-      this.getOrderPayment()
+      this.getOrderPayment(),
+      this.getLogger()
     );
   }
 

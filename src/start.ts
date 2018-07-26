@@ -5,6 +5,6 @@ import {Container} from "./service/Container";
 const container = new Container();
 
 container.getKoaService()
-  .catch(console.error)
   .then((koa: KoaService) => koa.start())
-  .then(() => container.getFulfilmentService().start());
+  .then(() => container.getFulfilmentService().start())
+  .catch(console.error);
