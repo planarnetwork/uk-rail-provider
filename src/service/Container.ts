@@ -126,6 +126,7 @@ export class Container {
       this.getJourneyPlanStorage(),
       this.getOrderStorage(),
       new NodeRSA(this.config.awt.key),
+      this.getLogger()
     );
   }
 

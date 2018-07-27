@@ -3,6 +3,7 @@ import {Links} from "../service/controller/jp/JPController";
 import {AxiosInstance} from "axios";
 import * as NodeRSA from "node-rsa";
 import {JourneyPlanStorage} from "./JourneyPlanStorage";
+import {Logger} from "pino";
 
 export class OrderFactory {
 
@@ -10,7 +11,8 @@ export class OrderFactory {
     private readonly awt: AxiosInstance,
     private readonly jpStorage: JourneyPlanStorage,
     private readonly orderStorage: OrderStorage,
-    private readonly key: NodeRSA
+    private readonly key: NodeRSA,
+    private readonly logger: Logger
   ) {}
 
   private async getSessionToken(): Promise<string> {
@@ -24,9 +26,9 @@ export class OrderFactory {
       return response.data.data.token;
     }
     catch (err) {
-      console.log(err.config.headers);
-      console.log({ vendor, text, signature });
-      console.log(err.response.data);
+      this.logger.error(err.config.headers);
+      this.logger.error({ vendor, text, signature });
+      this.logger.error(err.response.data);
 
       throw new Error("Unable to create token");
     }
@@ -50,7 +52,7 @@ export class OrderFactory {
       return response.data;
     }
     catch (err) {
-      console.log(err.response.data);
+      this.logger.error(err.response.data);
 
       throw new Error("Unable to create order");
     }
