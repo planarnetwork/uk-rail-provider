@@ -23,7 +23,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "@koa/cors": "^2.2.2",
-    "@planar/ticket-wallet": "^0.3.0",
+    "@planar/ticket-wallet": "^0.3.1",
     "autobind-decorator": "^2.1.0",
     "axios": "^0.18.0",
     "koa": "^2.5.2",
