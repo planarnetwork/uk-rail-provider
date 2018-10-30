@@ -12,7 +12,7 @@ import {SignatureProvider} from "../signature/SignatureProvider";
 import {dev, live} from "../../config/config";
 import {TicketWallet} from "@planar/ticket-wallet";
 const Web3 = require("web3");
-import {Contract} from "web3/types";
+import Contract from "web3/eth/contract";
 import {FulfilmentService} from "../fulfilment/FulfilmentService";
 import {OrderStorage} from "../order/OrderStorage";
 import {OrderFactory} from "../order/OrderFactory";

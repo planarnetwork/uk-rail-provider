@@ -1,5 +1,5 @@
 import {AxiosInstance} from "axios";
-import {Utils} from "web3/types";
+import Utils from "web3/utils";
 
 export class CurrencyExchange {
 

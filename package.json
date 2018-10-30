@@ -26,23 +26,23 @@
     "@planar/ticket-wallet": "^0.3.1",
     "autobind-decorator": "^2.1.0",
     "axios": "^0.18.0",
-    "koa": "^2.5.2",
+    "koa": "^2.6.1",
     "koa-better-http-proxy": "^0.2.4",
     "koa-bodyparser": "^4.2.1",
     "memoized-class-decorator": "^1.6.1",
     "node-rsa": "^1.0.1",
-    "pino": "^5.4.0",
-    "pino-pretty": "^2.0.1",
-    "web3": "^1.0.0-beta.35"
+    "pino": "^5.8.0",
+    "pino-pretty": "^2.2.3",
+    "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
     "@types/koa": "^2.0.46",
     "@types/koa-bodyparser": "^5.0.1",
-    "@types/node": "^10.9.3",
+    "@types/node": "^10.12.1",
     "@types/node-rsa": "^0.4.3",
     "@types/pino": "^4.16.1",
-    "@types/web3": "^1.0.3",
+    "@types/web3": "^1.0.11",
     "ts-node": "^7.0.1",
-    "typescript": "^3.0.3"
+    "typescript": "^3.1.4"
   }
 }
