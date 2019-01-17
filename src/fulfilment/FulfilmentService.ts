@@ -14,7 +14,7 @@ export class FulfilmentService {
   ) {}
 
   public start(): void {
-    setInterval(() => this.run(), 5 * 1000);
+    setInterval(() => this.run(), 2* 1000);
   }
 
   private async run(): Promise<void> {
