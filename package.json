@@ -33,7 +33,7 @@
     "node-rsa": "^1.0.6",
     "pino": "^5.13.3",
     "pino-pretty": "^2.6.1",
-    "web3": "^1.2.1"
+    "web3": "^4.16.0"
   },
   "devDependencies": {
     "@types/koa": "^2.0.50",
